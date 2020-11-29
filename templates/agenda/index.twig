@@ -1,0 +1,91 @@
+{% extends "base.html.twig" %}
+{% block title %}
+    eventos- calendario
+{% endblock %}
+{% block body %}
+    <nav>
+        <il>
+            <ul><h3>Crear Evento</h3></ul>
+            <ul><h3>Calendario</h3></ul>
+        </il>
+    </nav>
+    <div class="row">
+        <div class="column">
+            {{ form_start(form) }}
+            {{ form_end(form) }}
+        </div>
+        <div class="column">
+            <table class="table" data-role="table">
+                <thead>
+                <tr>
+                    <th>id</th>
+                    <th>nombre</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for eventos in eventos %}
+                    <tr>
+                        <td>{{ eventos.id }}</td>
+                        <td>{{ eventos.nombre }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="column">
+            <div id='calendar'></div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                headerToolbar: {
+                    center: 'dayGridMonth,timeGridFourDay' // buttons for switching between views
+                },
+                views: {
+                    timeGridFourDay: {
+                        type: 'timeGrid',
+                        duration: { days: 4 },
+                        buttonText: '4 day'
+                    }
+                },
+                navLinks: true,
+                navLinkWeekClick: function(weekStart, jsEvent) {
+                    console.log('week start', weekStart.toISOString());
+                    console.log('coords', jsEvent.pageX, jsEvent.pageY);
+                },
+                eventRender: function(info) {
+                    var tooltip = new Tooltip(info.el, {
+                        title: info.event.extendedProps.description,
+                        placement: 'top',
+                        trigger: 'hover',
+                        container: 'body'
+                    });
+                },
+                eventSources: [
+                    {
+                        url: "{{ path('api_lista_eventos') }}",
+                        method: 'GET',
+                        failure: function () {
+                            alert('¡Hubo un error al recuperar eventos!');
+                        },
+                        color: 'yellow',   // a non-ajax option
+                        textColor: 'black' // a non-ajax option
+                    }
+                ],
+
+            });
+            calendar.render();
+        });
+    </script>
+{% endblock %}
+
+
